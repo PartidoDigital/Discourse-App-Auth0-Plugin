@@ -94,9 +94,11 @@
         }
 
         lock.show({
-          popup:        true,
-          responseType: 'code',
-          redirectUrl:  Discourse.SiteSettings.auth0_callback_url
+	  auth: {
+          	popup:        true,
+          	responseType: 'code',
+          	redirectUrl:  Discourse.SiteSettings.auth0_callback_url
+	  }
         });
 
         this.controllerFor('login').resetForm();
@@ -117,10 +119,12 @@
           }
         } else {
           lock.show({
-            mode:         'signup',
-            popup:        true,
-            responseType: 'code',
-            redirectUrl:  Discourse.SiteSettings.auth0_callback_url
+	    auth: {
+            	mode:         'signup',
+            	popup:        true,
+            	responseType: 'code',
+            	redirectUrl:  Discourse.SiteSettings.auth0_callback_url
+	    }
           });
         }
       }
