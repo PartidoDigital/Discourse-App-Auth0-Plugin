@@ -96,7 +96,7 @@
         lock.show({
           popup:        true,
           responseType: 'code',
-          callbackURL:  Discourse.SiteSettings.auth0_callback_url
+          redirectUrl:  Discourse.SiteSettings.auth0_callback_url
         });
 
         this.controllerFor('login').resetForm();
@@ -120,7 +120,7 @@
             mode:         'signup',
             popup:        true,
             responseType: 'code',
-            callbackURL:  Discourse.SiteSettings.auth0_callback_url
+            redirectUrl:  Discourse.SiteSettings.auth0_callback_url
           });
         }
       }
