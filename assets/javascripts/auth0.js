@@ -37,7 +37,7 @@
 	additionalSignUpFields: [{
 		name: "credencial",
 		placeholder: "ingrese su credencial",
-		icon: "assets/img/credencial.png",
+		icon: "https://recursos.partidodigital.org.uy/assets/img/credencial.png",
 		validator: function(credencial) {
 			function isNumber(n) {
 				return !isNaN(parseFloat(n)) && isFinite(n)
