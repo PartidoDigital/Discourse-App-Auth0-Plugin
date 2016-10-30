@@ -2,14 +2,56 @@
 (function () {
   function appendScript(src, callback) {
     var new_script = document.createElement('script');
-    new_script.setAttribute('src',src);
+    new_script.setAttribute('src', src);
     new_script.onload = callback;
     document.head.appendChild(new_script);
   }
+  
+  function appendLink(href, callback) {
+    var new_link = document.createElement("link");
+    new_link.setAttribute('type', 'text/css');
+    new_link.setAttribute('rel', 'stylesheet');
+    new_link.setAttribute('href', href);
+    document.head.appendChild(new_link);
+  }
 
   var lock;
+  
+  var lock_options = {
+		language: "es",
+		theme: {
+			logo: "https://recursos.partidodigital.org.uy/assets/img/logo_original.svg",
+			primaryColor: "#F37021"
+		},
+		allowForgotPassword: true,
+		allowLogin: true,
+		loginAfterSignUp: false,
+		mustAcceptTerms: true,
+		languageDictionary: {
+			signUpTerms: "Acepto los <a href='https://partidodigital.com/documentos/terminos-de-uso' target='_new'>términos de uso</a> y <a href='https://partidodigital.com/documentos/privacidad-de-datos' target='_new'>privacidad de datos</a>.",
+			title: "Acceso",
+			success: {
+				signUp: "Registro completado exitosamente. Chequea tu correo para verificar tu dirección y seguir con los próximos pasos."
+			}
+		},
+		additionalSignUpFields: [{
+			name: "credencial",
+			placeholder: "ingrese su credencial",
+			icon: "assets/img/credencial.png",
+			validator: function(credencial) {
+				function isNumber(n) {
+					return !isNaN(parseFloat(n)) && isFinite(n)
+				}
+				var split = credencial.split(" ");
+				return {
+					valid: split.length === 2 && !isNumber(split[0]) && isNumber(split[1]),
+					hint: "Aseguresé de ingresar su credencial en formato \"ABC 12345\" con un espacio."
+				};
+			}
+		}]
+	};
 
-  var script_url = '//cdn.auth0.com/js/lock-9.2.js';
+  var script_url = 'cdn.auth0.com/js/lock/10.5.0/lock.js';
 
   appendScript(script_url, function () {
     var checkInterval = setInterval(function () {
@@ -26,7 +68,7 @@
       var client_id = Discourse.SiteSettings.auth0_client_id;
       var domain = Discourse.SiteSettings.auth0_domain;
 
-      lock = new Auth0Lock(client_id, domain);
+      lock = new Auth0Lock(client_id, domain, lock_options);
 
     }, 300);
   });
