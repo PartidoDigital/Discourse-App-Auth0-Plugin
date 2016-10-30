@@ -1,0 +1,7 @@
+en:
+  site_settings:
+    auth0_domain: 'Tu dominio de Auth0. Esto es tipicamente <tu_cuenta>.auth0.com.'
+    auth0_client_id: 'Tu Client ID de Auth0. Está en application settings en el Dashboard de Auth0.'
+    auth0_client_secret: 'Tu Client Secret de Auth0. Está en application settings en el Dashboard de Auth0.'
+    auth0_callback_url: 'La URL que Auth0 va a redireccionar luego de autenticar. Típicamente https://url-de-discourse/auth/auth0/callback.'
+    auth0_connection: 'Opcional. Si solo quieres usar un solo proveedor de autenticación de Auth0.'
