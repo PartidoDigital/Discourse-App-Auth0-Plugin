@@ -51,7 +51,7 @@
 	}]
   };
 
-  var script_url = 'cdn.auth0.com/js/lock/10.5.0/lock.js';
+  var script_url = '//cdn.auth0.com/js/lock/10.5.0/lock.js';
 
   appendScript(script_url, function () {
     var checkInterval = setInterval(function () {
