@@ -19,6 +19,10 @@
   
   var lock_options = {
 	language: "es",
+	auth: {
+          	responseType: 'code',
+          	redirectUrl:  Discourse.SiteSettings.auth0_callback_url
+	},
 	theme: {
 		logo: "https://recursos.partidodigital.org.uy/assets/img/logo_original.svg",
 		primaryColor: "#F37021"
@@ -93,13 +97,7 @@
           return this._super();
         }
 
-        lock.show({
-	  auth: {
-          	popup:        true,
-          	responseType: 'code',
-          	redirectUrl:  Discourse.SiteSettings.auth0_callback_url
-	  }
-        });
+        lock.show();
 
         this.controllerFor('login').resetForm();
       },
@@ -119,12 +117,7 @@
           }
         } else {
           lock.show({
-	    auth: {
-            	mode:         'signup',
-            	popup:        true,
-            	responseType: 'code',
-            	redirectUrl:  Discourse.SiteSettings.auth0_callback_url
-	    }
+            mode: 'signup'
           });
         }
       }
