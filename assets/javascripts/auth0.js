@@ -76,6 +76,7 @@
         domain: domain,
         clientID: client_id,
 	callbackUrl: Discourse.SiteSettings.auth0_callback_url,
+	callbackOnLocationHash: true
       });
 
       // Handle authenticated event to store id_token in localStorage
