@@ -38,6 +38,7 @@
 	popup: true,
         auth: {
           responseType: 'code',
+	  redirect: false,
           redirectUrl: Discourse.SiteSettings.auth0_callback_url
         },
         theme: {
