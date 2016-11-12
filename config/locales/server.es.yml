@@ -1,4 +1,4 @@
-en:
+es:
   site_settings:
     auth0_domain: 'Tu dominio de Auth0. Esto es tipicamente <tu_cuenta>.auth0.com.'
     auth0_client_id: 'Tu Client ID de Auth0. Está en application settings en el Dashboard de Auth0.'
