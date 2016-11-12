@@ -35,6 +35,7 @@
       var domain = Discourse.SiteSettings.auth0_domain;
       var lock_options = {
         language: "es",
+	popup: true,
         auth: {
           responseType: 'code',
           redirectUrl: Discourse.SiteSettings.auth0_callback_url
