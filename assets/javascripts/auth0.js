@@ -37,7 +37,6 @@
         language: "es",
         auth: {
           responseType: 'code',
-	  redirect: false,
           redirectUrl: Discourse.SiteSettings.auth0_callback_url
         },
         theme: {
@@ -106,7 +105,8 @@
             // there is! redirect to Auth0 for SSO
             auth0.signin({
               connection: data.lastUsedConnection.name,
-              scope: 'openid name picture'
+              scope: 'openid name picture',
+	      callbackUrl: Discourse.SiteSettings.auth0_callback_url
             });
           }
         });
