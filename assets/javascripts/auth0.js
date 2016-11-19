@@ -15,7 +15,7 @@
     document.head.appendChild(new_link);
   }
 
-  var lockLogin, lockRegister;
+  var lock_login, lock_register, lock_options_register, lock_options_login;
 
   var script_url = '//cdn.auth0.com/js/lock/10.5.0/lock.js';
 
@@ -33,7 +33,7 @@
 
       var client_id = Discourse.SiteSettings.auth0_client_id;
       var domain = Discourse.SiteSettings.auth0_domain;
-      var lock_options = {
+      lock_options_register = {
         language: "es",
         auth: {
           responseType: 'code',
@@ -72,9 +72,11 @@
         }]
       };
 
-      lockRegister = new Auth0Lock(client_id, domain, lock_options);	    
-      lock_options.auth.redirect = true;
-      lockLogin = new Auth0Lock(client_id, domain, lock_options);
+      lock_register = new Auth0Lock(client_id, domain, lock_options_register);
+	    
+      lock_options_login = JSON.parse(JSON.stringify(lock_options_register));
+      lock_options_login.auth.redirect = true;
+      lock_login = new Auth0Lock(client_id, domain, lock_options_login);
     }, 300);
   });
 
@@ -83,8 +85,8 @@
   var LoginController = require('discourse/controllers/login').default;
   LoginController.reopen({
     authenticationComplete: function() {
-      if (lockLogin) {
-        lockLogin.hide();
+      if (lock_login) {
+        lock_login.hide();
       }
       return this._super.apply(this, arguments);
     }
@@ -98,7 +100,7 @@
           return this._super();
         }
 
-        lockLogin.show();
+        lock_login.show();
 
         this.controllerFor('login').resetForm();
       },
@@ -110,14 +112,14 @@
         var createAccountController = Discourse.__container__.lookup('controller:createAccount');
 
         if (createAccountController && createAccountController.accountEmail) {
-          if (lockRegister) {
-            lockRegister.hide();
+          if (lock_register) {
+            lock_register.hide();
             Discourse.Route.showModal(this, 'createAccount');
           } else {
             this._super();
           }
         } else {
-          lockRegister.show({
+          lock_register.show({
             initialScreen: 'signUp'
           });
         }
