@@ -15,7 +15,7 @@
     document.head.appendChild(new_link);
   }
 
-  var lock;
+  var lockLogin, lockRegister;
 
   var script_url = '//cdn.auth0.com/js/lock/10.5.0/lock.js';
 
@@ -72,47 +72,9 @@
         }]
       };
 
-      lock = new Auth0Lock(client_id, domain, lock_options);
-      var auth0 = new Auth0({
-        domain: domain,
-        clientID: client_id,
-	callbackUrl: Discourse.SiteSettings.auth0_callback_url/*,
-	callbackOnLocationHash: true*/
-      });
-
-      // Handle authenticated event to store id_token in localStorage
-      lock.on("authenticated", function(authResult) {
-        isAuthCallback = true;
-
-        lock.getProfile(authResult.idToken, function(error, profile) {
-          if (error) {
-            console.error(error);
-            return;
-          }
-
-          localStorage.setItem('userToken', authResult.idToken);
-          return;
-        });
-      });
-
-      var isAuthCallback = false;
-
-      // Get the user token if we've saved it in localStorage before
-      var idToken = localStorage.getItem('userToken');
-      if (!idToken) {
-        // user is not logged, check whether there is an SSO session or not
-        auth0.getSSOData(function(err, data) {
-          if (!isAuthCallback && !err && data.sso) {
-            // there is! redirect to Auth0 for SSO
-            auth0.signin({
-              connection: data.lastUsedConnection.name,
-              scope: 'openid name picture',
-	      callbackUrl: Discourse.SiteSettings.auth0_callback_url
-            });
-          }
-        });
-      }
-
+      lockRegister = new Auth0Lock(client_id, domain, lock_options);	    
+      lock_options.auth.redirect = true;
+      lockLogin = new Auth0Lock(client_id, domain, lock_options);
     }, 300);
   });
 
@@ -121,8 +83,8 @@
   var LoginController = require('discourse/controllers/login').default;
   LoginController.reopen({
     authenticationComplete: function() {
-      if (lock) {
-        lock.hide();
+      if (lockLogin) {
+        lockLogin.hide();
       }
       return this._super.apply(this, arguments);
     }
@@ -136,7 +98,7 @@
           return this._super();
         }
 
-        lock.show();
+        lockLogin.show();
 
         this.controllerFor('login').resetForm();
       },
@@ -148,14 +110,14 @@
         var createAccountController = Discourse.__container__.lookup('controller:createAccount');
 
         if (createAccountController && createAccountController.accountEmail) {
-          if (lock) {
-            lock.hide();
+          if (lockRegister) {
+            lockRegister.hide();
             Discourse.Route.showModal(this, 'createAccount');
           } else {
             this._super();
           }
         } else {
-          lock.show({
+          lockRegister.show({
             initialScreen: 'signUp'
           });
         }
