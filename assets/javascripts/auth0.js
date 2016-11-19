@@ -155,7 +155,7 @@
           }
         } else {
           lock.show({
-            mode: 'signup'
+            initialScreen: 'signUp'
           });
         }
       }
