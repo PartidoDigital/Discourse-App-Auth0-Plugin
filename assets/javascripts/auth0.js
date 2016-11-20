@@ -1,4 +1,4 @@
-/* global Auth0Lock */
+/* global Auth0, Auth0Lock */
 (function() {
   function appendScript(src, callback) {
     var new_script = document.createElement('script');
@@ -15,11 +15,9 @@
     document.head.appendChild(new_link);
   }
 
-  var lock_login, lock_register;
+  var lock, auth0, isAuthCallback = false;
 
-  var script_url = '//cdn.auth0.com/js/lock/10.5.0/lock.js';
-
-  appendScript(script_url, function() {
+  appendScript('//cdn.auth0.com/js/lock/10.6.1/lock.js', function() {
     var checkInterval = setInterval(function() {
       if (!Discourse.SiteSettings) {
         return;
@@ -33,7 +31,7 @@
 
       var client_id = Discourse.SiteSettings.auth0_client_id;
       var domain = Discourse.SiteSettings.auth0_domain;
-      var lock_options_register = {
+      var lock_options = {
         language: "es",
         auth: {
           responseType: 'code',
@@ -71,47 +69,48 @@
           }
         }]
       };
-	    
-      var lock_options_login = {
-        language: "es",
-        auth: {
-          responseType: 'code',
-          redirectUrl: Discourse.SiteSettings.auth0_callback_url
-        },
-        theme: {
-          logo: "https://recursos.partidodigital.org.uy/assets/img/logo_original.svg",
-          primaryColor: "#F37021"
-        },
-        allowForgotPassword: true,
-        allowLogin: true,
-        loginAfterSignUp: false,
-        mustAcceptTerms: true,
-        languageDictionary: {
-          signUpTerms: "Acepto los <a href='https://partidodigital.com/documentos/terminos-de-uso' target='_new'>términos de uso</a> y <a href='https://partidodigital.com/documentos/privacidad-de-datos' target='_new'>privacidad de datos</a>.",
-          title: "Acceso",
-          success: {
-            signUp: "Registro completado exitosamente. Chequea tu correo para verificar tu dirección y seguir con los próximos pasos."
-          }
-        },
-        additionalSignUpFields: [{
-          name: "credencial",
-          placeholder: "ingrese su credencial",
-          icon: "https://recursos.partidodigital.org.uy/assets/img/credencial.png",
-          validator: function(credencial) {
-            function isNumber(n) {
-              return !isNaN(parseFloat(n)) && isFinite(n)
-            }
-            var split = credencial.split(" ");
-            return {
-              valid: split.length === 2 && !isNumber(split[0]) && isNumber(split[1]),
-              hint: "Aseguresé de ingresar su credencial en formato \"ABC 12345\" con un espacio."
-            };
-          }
-        }]
-      };
 
-      lock_register = new Auth0Lock(client_id, domain, lock_options_register);
-      lock_login = new Auth0Lock(client_id, domain, lock_options_login);
+      lock = new Auth0Lock(client_id, domain, lock_options);
+      auth0 = new Auth0({
+        domain: domain,
+        clientID: client_id
+      });
+	    
+      // Handle authenticated event to store id_token in localStorage
+      lock.on("authenticated", function (authResult) {
+	console.log("lock authenticated event triggered");
+        isAuthCallback = true;
+
+        lock.getProfile(authResult.idToken, function (error, profile) {
+          if (error) {
+            // Handle error
+            return;
+          }
+          console.log("profile fetched, storing idToken");
+          localStorage.setItem('userToken', authResult.idToken);
+          return;
+        });
+      });
+   
+      // Get the user token if we've saved it in localStorage before
+      var idToken = localStorage.getItem('userToken');
+      if (idToken) {
+        console.log("idToken exists");
+        return;
+      } else {
+	console.log("idToken does not exists, calling getSSOData");
+        // user is not logged, check whether there is an SSO session or not
+        auth0.getSSOData(function (err, data) {
+          if (!isAuthCallback && !err && data.sso) {
+            // there is! redirect to Auth0 for SSO
+            console.log("SSO in place, calling auth0.signin");
+            auth0.signin({
+              connection: data.lastUsedConnection.name,
+              scope: 'openid name picture'
+            });
+          }
+        });
+      }
     }, 300);
   });
 
@@ -120,8 +119,9 @@
   var LoginController = require('discourse/controllers/login').default;
   LoginController.reopen({
     authenticationComplete: function() {
-      if (lock_login) {
-        lock_login.hide();
+      console.log("LoginController: Authentication complete", arguments);
+      if (lock) {
+        lock.hide();
       }
       return this._super.apply(this, arguments);
     }
@@ -130,16 +130,27 @@
   var ApplicationRoute = require('discourse/routes/application').default;
   ApplicationRoute.reopen({
     actions: {
+      logout: function() {
+	console.log("ApplicationRoute: Action logout", arguments);
+        Discourse.User.logout().then(function() {
+          // Reloading will refresh unbound properties
+          Discourse.KeyValueStore.abandonLocal();
+          // logout from SSO
+          auth0.logout({returnTo: "https://" + Discourse.BaseUrl});
+        });
+      },
       showLogin: function() {
+	console.log("ApplicationRoute: Action showLogin", arguments);
         if (!Discourse.SiteSettings.auth0_client_id || Discourse.SiteSettings.auth0_connection !== '') {
           return this._super();
         }
 
-        lock_login.show();
+        lock.show();
 
         this.controllerFor('login').resetForm();
       },
       showCreateAccount: function() {
+	console.log("ApplicationRoute: Action showCreateAccount", arguments);
         if (!Discourse.SiteSettings.auth0_client_id || Discourse.SiteSettings.auth0_connection !== '') {
           return this._super();
         }
@@ -147,14 +158,16 @@
         var createAccountController = Discourse.__container__.lookup('controller:createAccount');
 
         if (createAccountController && createAccountController.accountEmail) {
-          if (lock_register) {
-            lock_register.hide();
+          console.log("createAccountController in place", createAccountController);
+          if (lock) {
+            lock.hide();
             Discourse.Route.showModal(this, 'createAccount');
           } else {
             this._super();
           }
         } else {
-          lock_register.show({
+          console.log("no createAccountController, calling lock.show:signup");
+          lock.show({
             initialScreen: 'signUp'
           });
         }
