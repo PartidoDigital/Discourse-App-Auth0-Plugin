@@ -31,12 +31,13 @@
 
       var client_id = Discourse.SiteSettings.auth0_client_id;
       var domain = Discourse.SiteSettings.auth0_domain;
+      var discourseCallbackUrl = Discourse.SiteSettings.auth0_callback_url;
       var lock_options = {
         language: "es",
         auth: {
           responseType: 'code',
 	  redirect: false,
-          redirectUrl: Discourse.SiteSettings.auth0_callback_url
+          redirectUrl: discourseCallbackUrl
         },
         theme: {
           logo: "https://recursos.partidodigital.org.uy/assets/img/logo_original.svg",
@@ -73,7 +74,8 @@
       lock = new Auth0Lock(client_id, domain, lock_options);
       auth0 = new Auth0({
         domain: domain,
-        clientID: client_id
+        clientID: client_id,
+	callbackURL: discourseCallbackUrl
       });
 	    
       // Handle authenticated event to store id_token in localStorage
