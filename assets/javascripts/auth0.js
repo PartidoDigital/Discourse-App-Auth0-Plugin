@@ -95,7 +95,7 @@
       });
    
       // Get the user token if we've saved it in localStorage before
-      var idToken = localStorage.getItem('userToken');
+      /*var idToken = localStorage.getItem('userToken');
       if (idToken) {
         console.log("idToken exists");
         return;
@@ -112,7 +112,7 @@
             });
           }
         });
-      }
+      }*/
     }, 300);
   });
 
