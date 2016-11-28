@@ -1,6 +1,6 @@
 /* global Auth0, Auth0Lock */
 (function() {
-  function appendScript(src, callback) {
+  /*function appendScript(src, callback) {
     var new_script = document.createElement('script');
     new_script.setAttribute('src', src);
     new_script.onload = callback;
@@ -95,7 +95,7 @@
       });
    
       // Get the user token if we've saved it in localStorage before
-      /*var idToken = localStorage.getItem('userToken');
+      var idToken = localStorage.getItem('userToken');
       if (idToken) {
         console.log("idToken exists");
         return;
@@ -112,7 +112,7 @@
             });
           }
         });
-      }*/
+      }
     }, 300);
   });
 
@@ -175,6 +175,6 @@
         }
       }
     }
-  });
+  });*/
 
 })();
